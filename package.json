@@ -1,11 +1,11 @@
 {
   "name": "muta-scripts",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "index.js",
   "scripts": {},
   "bin": {
-    "muta-check-dup-tx": "check-dup-tx.js"
+    "muta-check-dup-tx": "./check-dup-tx.js"
   },
   "keywords": [],
   "author": "",
