@@ -1,23 +1,24 @@
 #!/usr/bin/env node
 
 const program = require('commander');
-
 const { Muta } = require('muta-sdk');
 
 require('debug').enable('dup:*');
 const trace = require('debug')('dup:trace');
 const error = require('debug')('dup:error');
 
+const DEFAULT_MAX_CACHE_SIZE = 5000000;
+
 program
   .option('-h --host <host>', 'host', '127.0.0.1')
   .option('-p --port <port>', 'port', '8000')
   .option('-s --start <start>', 'starts block', 1)
-  .option('-e --end <end>', 'ends block', 0)
+  // .option('-e --end <end>', 'ends block', 0)
   .option('--verbose', 'verbose info for debug', false)
   .option(
-    '-m --max-size <maxSize>',
+    '-m --max-cache-size <maxCacheSize>',
     'clear when tx cache when oversize',
-    5000000
+    DEFAULT_MAX_CACHE_SIZE
   );
 
 program.parse(process.argv);
@@ -34,33 +35,42 @@ function parseNumber(x, defaults = 0) {
 }
 
 class DupChecker {
+  /**
+   *
+   * @param {Object} options
+   * @param {Number} options.start
+   * @param {String} options.host
+   * @param {String|Number} options.port
+   * @param {Number} options.maxCacheSize
+   */
   constructor(options) {
-    const { start, host, port, maxSize, verbose } = program;
-
     /**
      * starts with the block
-     * @type {number}
+     * @type {Number}
      */
-    this.startBlock = parseNumber(start, 1);
+    this.startBlock = parseNumber(options.start, 1);
 
     /**
      * checking until height reach endBlock
-     * @type {number}
+     * @type {Number}
      */
     this.endBlock = 0;
 
     /**
      * the max size of cache
-     * @type {number}
+     * @type {Number}
      */
-    this.maxCacheSize = parseNumber(maxSize, 5000000);
+    this.maxCacheSize = parseNumber(
+      options.maxCacheSize,
+      DEFAULT_MAX_CACHE_SIZE
+    );
 
     /**
      * Muta instance
      * @type {Muta}
      */
     this.mutaInstance = new Muta({
-      endpoint: `http://${host}:${port}/graphql`,
+      endpoint: `http://${options.host}:${options.port}/graphql`,
       chainId:
         '0xb6a4d7da21443f5e816e8700eea87610e6d769657d6b8ec73028457bf2ca4036'
     });
@@ -155,4 +165,4 @@ class DupChecker {
   }
 }
 
-new DupChecker().run();
+new DupChecker(program).run();
